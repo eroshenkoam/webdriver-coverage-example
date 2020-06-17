@@ -43,7 +43,7 @@ public class GithubIssueTest {
             $x("//a[contains(@data-selected-links, 'repo_issues')]").click();
         });
         step("Проверяем наличие задачи с ID=" + ISSUE_NUMBER, () -> {
-            $x("//a[@id='issue_12_link']").exists();
+            $x("//a[@id='issue_12_link']").click();
         });
     }
 
