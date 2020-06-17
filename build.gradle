@@ -1,13 +1,18 @@
 plugins {
     id 'java'
     id 'io.qameta.allure' version '2.8.1'
-
+    id 'de.undercouch.download' version '4.0.4'
 }
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
+
+ext {
+    allureDownloadUrl = 'https://github.com/eroshenkoam/webdriver-coverage-example/releases/download/1.0.0/allure-commandline-2.14-hotspot.zip'
+    allureCommandline = './.allure/allure-2.14-SNAPSHOT/bin/allure'
+}
 
 repositories {
     mavenCentral()
@@ -20,6 +25,33 @@ allure {
     useJUnit5 {
         version = "2.13.3"
     }
+}
+
+task downloadCommandline(type: Download) {
+    src "${allureDownloadUrl}"
+    dest file(".allure/commandline.zip")
+    doFirst {
+        mkdir file(".allure")
+    }
+}
+
+task unzipCommandline(type: Copy) {
+    dependsOn("downloadCommandline")
+    def zipFile = file(".allure/commandline.zip")
+    from zipTree(zipFile)
+    into file(".allure")
+}
+
+task copyExecutor(type: Copy) {
+    from file("allure/executor.json")
+    into file("build/allure-results")
+}
+
+task coverageReport(type: Exec) {
+    dependsOn('copyExecutor', 'unzipCommandline')
+
+    commandLine "${allureCommandline}", "serve", "-p", "3333", "-i", "build/allure-results"
+    workingDir '.'
 }
 
 test {
